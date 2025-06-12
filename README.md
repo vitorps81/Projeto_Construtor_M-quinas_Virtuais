@@ -1,6 +1,6 @@
 # Construtor de Máquinas Virtuais / Ambientes de Execução
 
-Este projeto demonstra a aplicação do padrão de projeto **Builder** para a construção incremental e flexível de máquinas virtuais (VMs) e ambientes de execução.
+Este projeto demonstra a aplicação de padrões de projeto para a construção e gerenciamento de máquinas virtuais (VMs) e ambientes de execução.
 
 ---
 
@@ -142,3 +142,66 @@ cd C:\Users\VITORSARAIVADESOUZA\Documents\Construtor_Máquinas_Virtuais
 # Em seguida, execute os testes
 python -m unittest discover test
 
+---
+
+## 2ª Entrega: Padrões Estruturais - Composite e Facade
+
+Nesta segunda fase do projeto, foram adicionados os padrões estruturais **Composite** e **Facade** para aumentar a flexibilidade na composição de softwares e simplificar a interface de uso do subsistema de construção de VMs.
+
+### Padrão Composite: Gerenciamento Flexível de Softwares
+
+* **Por que foi escolhido?**
+    O padrão Composite foi escolhido para lidar com a complexidade da instalação de softwares em máquinas virtuais. Uma VM pode precisar de softwares individuais (ex: "Python") ou de um conjunto de softwares que funcionam como uma unidade (ex: "Stack LAMP"). O Composite permite tratar tanto softwares individuais quanto grupos de softwares de forma uniforme, sem que o cliente precise distinguir entre eles.
+
+* **Como foi implementado?**
+    1.  **`ComponenteSoftware` (Interface):** Uma classe abstrata (`src/software_componente.py`) que define a interface comum (`get_nome()`) para todos os componentes de software.
+    2.  **`SoftwareIndividual` (Folha):** Uma classe concreta (`src/software_componente.py`) que implementa `ComponenteSoftware` e representa um único software.
+    3.  **`GrupoSoftware` (Composite):** Uma classe (`src/software_composite.py`) que também implementa `ComponenteSoftware` e pode conter uma coleção de outros `ComponenteSoftware` (folhas ou outros composites). Seu método `get_nome()` agrega os nomes de seus filhos.
+    4.  A classe `MaquinaVirtual` foi modificada para armazenar objetos `ComponenteSoftware` em sua lista `softwares_instalados`.
+    5.  O método `instalar_software` no `MaquinaVirtualBuilder` agora aceita objetos `ComponenteSoftware`.
+    6.  O `Diretor` utiliza `SoftwareIndividual` e `GrupoSoftware` para compor as configurações de software das VMs predefinidas (ex: "Dev Stack Python").
+
+    ```python
+    # Exemplo de uso do Composite no Diretor
+    from src.software_componente import SoftwareIndividual
+    from src.software_composite import GrupoSoftware
+
+    dev_stack = GrupoSoftware("Dev Stack Python")
+    dev_stack.adicionar(SoftwareIndividual("Python 3.9"))
+    dev_stack.adicionar(SoftwareIndividual("Docker"))
+    # ...
+
+    builder.instalar_software(dev_stack)
+    ```
+
+### Padrão Facade: Simplificando a Interação com o Subsistema
+
+* **Por que foi escolhido?**
+    O padrão Facade foi escolhido para simplificar a interface para o subsistema complexo de construção de VMs. O cliente não precisa interagir diretamente com o `Diretor`, `Builders` específicos ou a `MaquinaVirtual` para criar uma VM comum. A Facade oferece um conjunto de métodos de alto nível para operações frequentemente usadas.
+
+* **Como foi implementado?**
+    1.  **`GerenciadorVM` (Facade):** Uma nova classe (`src/vm_facade.py`) que encapsula a complexidade do subsistema de construção de VMs.
+    2.  Possui métodos simples como `criar_vm_desenvolvimento_linux()`, `criar_vm_web_server_windows()`, etc.
+    3.  Internamente, a `GerenciadorVM` utiliza instâncias do `Diretor` e dos `Builders` para realizar as operações, escondendo os detalhes de implementação do cliente.
+
+    ```python
+    # Exemplo de uso da Facade
+    from src.vm_facade import GerenciadorVM
+
+    gerenciador = GerenciadorVM()
+    vm_dev = gerenciador.criar_vm_desenvolvimento_linux()
+    print(vm_dev)
+    ```
+
+---
+
+### Como Rodar os Testes:
+
+Para rodar os testes unitários e verificar se tudo está funcionando como esperado, navegue até a **pasta raiz do seu projeto** no terminal (por exemplo, `C:\Users\VITORSARAIVADESOUZA\Documents\Construtor_Máquinas_Virtuais`) e execute o seguinte comando:
+
+```bash
+# Primeiro, navegue até a pasta raiz do seu projeto
+cd C:\Users\VITORSARAIVADESOUZA\Documents\Construtor_Máquinas_Virtuais
+
+# Em seguida, execute os testes (inclui testes para Composite e Facade)
+python -m unittest discover test

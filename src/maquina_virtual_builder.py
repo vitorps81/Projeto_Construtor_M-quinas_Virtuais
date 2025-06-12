@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from src.maquina_virtual import MaquinaVirtual
+from src.software_componente import ComponenteSoftware 
 
 class MaquinaVirtualBuilder(ABC):
+    
     def __init__(self):
         self.maquina_virtual = MaquinaVirtual()
 
@@ -21,7 +23,7 @@ class MaquinaVirtualBuilder(ABC):
         self.maquina_virtual.disco_gb = disco_gb
         return self
 
-    def instalar_software(self, software: str):
+    def instalar_software(self, software: ComponenteSoftware):
         self.maquina_virtual.softwares_instalados.append(software)
         return self
 
@@ -31,3 +33,4 @@ class MaquinaVirtualBuilder(ABC):
 
     def get_maquina_virtual(self) -> MaquinaVirtual:
         return self.maquina_virtual
+    

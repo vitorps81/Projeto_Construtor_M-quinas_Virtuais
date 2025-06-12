@@ -1,14 +1,16 @@
 class MaquinaVirtual:
+    
     def __init__(self):
         self.sistema_operacional = None
         self.ram_gb = 0
         self.cpu_cores = 0
         self.disco_gb = 0
-        self.softwares_instalados = []
+        self.softwares_instalados = [] 
         self.rede_configurada = False
 
     def __str__(self):
-        softwares = ", ".join(self.softwares_instalados) if self.softwares_instalados else "Nenhum"
+        softwares_nomes = [comp.get_nome() for comp in self.softwares_instalados]
+        softwares = ", ".join(softwares_nomes) if softwares_nomes else "Nenhum"
         rede = "Configurada" if self.rede_configurada else "Não Configurada"
         return (f"--- Configuração da Máquina Virtual ---\n"
                 f"SO: {self.sistema_operacional}\n"

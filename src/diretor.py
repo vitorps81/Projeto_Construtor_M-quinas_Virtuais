@@ -2,16 +2,23 @@ from src.maquina_virtual_builder import MaquinaVirtualBuilder
 from src.linux_vm_builder import LinuxVMBuilder
 from src.windows_vm_builder import WindowsVMBuilder
 from src.maquina_virtual import MaquinaVirtual
+from src.software_componente import SoftwareIndividual
+from src.software_composite import GrupoSoftware
 
 class Diretor:
+
     def construir_vm_desenvolvimento(self, builder: MaquinaVirtualBuilder) -> MaquinaVirtual:
+        dev_stack = GrupoSoftware("Dev Stack Python")
+        dev_stack.adicionar(SoftwareIndividual("Python 3.9"))
+        dev_stack.adicionar(SoftwareIndividual("Docker"))
+        dev_stack.adicionar(SoftwareIndividual("Git"))
+
         return (builder
-                .definir_sistema_operacional() 
+                .definir_sistema_operacional()
                 .com_ram(8)
                 .com_cpu(2)
                 .com_disco(50)
-                .instalar_software("Python 3.9")
-                .instalar_software("Docker")
+                .instalar_software(dev_stack) 
                 .configurar_rede(True)
                 .get_maquina_virtual())
 
@@ -21,44 +28,42 @@ class Diretor:
                 .com_ram(16)
                 .com_cpu(4)
                 .com_disco(200)
-                .instalar_software("PostgreSQL")
+                .instalar_software(SoftwareIndividual("PostgreSQL")) 
                 .configurar_rede(True)
                 .get_maquina_virtual())
 
     def construir_vm_web_server(self, builder: MaquinaVirtualBuilder) -> MaquinaVirtual:
+        web_server_bundle = GrupoSoftware("Web Server Bundle")
+        web_server_bundle.adicionar(SoftwareIndividual("IIS")) 
+        web_server_bundle.adicionar(SoftwareIndividual("ASP.NET Core Runtime"))
+
         return (builder
                 .definir_sistema_operacional()
                 .com_ram(4)
                 .com_cpu(2)
                 .com_disco(100)
-                .instalar_software("IIS") 
+                .instalar_software(web_server_bundle) 
                 .configurar_rede(True)
                 .get_maquina_virtual())
 
 if __name__ == "__main__":
-    from src.linux_vm_builder import LinuxVMBuilder
-    from src.windows_vm_builder import WindowsVMBuilder
 
     diretor = Diretor()
-
-    print("--- Construindo VM de Desenvolvimento (Linux) ---")
     linux_builder = LinuxVMBuilder()
     vm_dev_linux = diretor.construir_vm_desenvolvimento(linux_builder)
     print(vm_dev_linux)
 
-    print("\n--- Construindo VM de Web Server (Windows) ---")
-    windows_builder = WindowsVMBuilder()
-    vm_web_windows = diretor.construir_vm_web_server(windows_builder)
-    print(vm_web_windows)
-
-    print("\n--- Construindo VM Customizada (Linux) ---")
     custom_linux_builder = LinuxVMBuilder()
+    custom_software_bundle = GrupoSoftware("Ferramentas Customizadas")
+    custom_software_bundle.adicionar(SoftwareIndividual("Nginx"))
+    custom_software_bundle.adicionar(SoftwareIndividual("Certbot"))
+
     vm_custom = (custom_linux_builder
                  .definir_sistema_operacional()
                  .com_ram(6)
                  .com_cpu(3)
                  .com_disco(75)
-                 .instalar_software("Nginx")
+                 .instalar_software(custom_software_bundle) 
                  .configurar_rede(True)
                  .get_maquina_virtual())
     print(vm_custom)
