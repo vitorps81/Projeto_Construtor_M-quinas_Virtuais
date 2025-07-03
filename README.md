@@ -1,6 +1,6 @@
 # Construtor de Máquinas Virtuais / Ambientes de Execução
 
-Este projeto demonstra a aplicação de padrões de projeto para a construção e gerenciamento de máquinas virtuais (VMs) e ambientes de execução.
+Este projeto demonstra a aplicação prática de **Padrões de Projeto (Design Patterns)** na construção e gerenciamento de máquinas virtuais (VMs) e ambientes de execução. Ao longo de três entregas, foram implementados padrões Criacionais, Estruturais e Comportamentais para promover flexibilidade, reusabilidade e manutenibilidade do código.
 
 ---
 
@@ -204,4 +204,68 @@ Para rodar os testes unitários e verificar se tudo está funcionando como esper
 cd C:\Users\VITORSARAIVADESOUZA\Documents\Construtor_Máquinas_Virtuais
 
 # Em seguida, execute os testes (inclui testes para Composite e Facade)
+python -m unittest discover test
+
+## 3ª Entrega: Padrões Comportamentais - Strategy e Observer
+
+Nesta última fase do projeto, foram adicionados os padrões comportamentais **Strategy** e **Observer** para introduzir comportamentos flexíveis e um mecanismo de notificação de eventos, aprimorando a interatividade e a capacidade de extensão do sistema.
+
+### Padrão Strategy: Estratégias de Otimização da VM
+
+* **Por que foi escolhido?**
+    O padrão Strategy foi selecionado para permitir que diferentes algoritmos de otimização de recursos (RAM, CPU, Disco) sejam aplicados a uma `MaquinaVirtual` de forma intercambiável em tempo de execução. Isso evita a necessidade de criar múltiplas subclasses de VM para cada combinação de otimização, promovendo flexibilidade e reusabilidade.
+
+* **Como foi implementado?**
+    1.  **`EstrategiaOtimizacaoVM` (Interface):** Uma classe abstrata (`src/vm_otimizacao_strategy.py`) que define o método `aplicar(vm: MaquinaVirtual)` para todas as estratégias.
+    2.  **`OtimizacaoDesempenhoStrategy` e `OtimizacaoEconomiaStrategy` (Estratégias Concretas):** Classes (`src/vm_otimizacao_strategy.py`) que implementam a interface, definindo regras específicas para otimização de desempenho ou economia de recursos.
+    3.  A classe `GerenciadorVM` (Facade) foi estendida para aceitar uma `EstrategiaOtimizacaoVM` opcional ao criar VMs, aplicando a estratégia antes de finalizar a construção.
+
+    ```python
+    # Exemplo de uso do Strategy na Facade
+    from src.vm_otimizacao_strategy import OtimizacaoDesempenhoStrategy
+
+    gerenciador = GerenciadorVM()
+    estrategia_desempenho = OtimizacaoDesempenhoStrategy()
+    vm_dev = gerenciador.criar_vm_desenvolvimento_linux(estrategia_desempenho)
+    # A VM 'vm_dev' terá seus recursos ajustados pela estratégia de desempenho
+    ```
+
+### Padrão Observer: Notificações de Eventos da VM
+
+* **Por que foi escolhido?**
+    O padrão Observer foi implementado para criar um mecanismo de notificação para eventos importantes do ciclo de vida das VMs, como sua criação. Isso permite que múltiplos componentes do sistema (como loggers, sistemas de monitoramento) reajam a esses eventos de forma desacoplada, sem que o objeto `MaquinaVirtual` ou a Facade precise saber sobre eles diretamente.
+
+* **Como foi implementado?**
+    1.  **`ObserverVM` (Interface):** Uma classe abstrata (`src/vm_observer.py`) que define o método `atualizar(vm: MaquinaVirtual, evento: str)` para todos os observadores.
+    2.  **`SubjectVM` (Interface):** Uma classe abstrata (`src/vm_observer.py`) que define métodos para anexar, desanexar e notificar observadores. A classe `GerenciadorVM` herda de `SubjectVM`.
+    3.  **`LoggerVMObserver` e `MonitoramentoVMObserver` (Observadores Concretos):** Classes (`src/vm_observer.py`) que implementam a interface `ObserverVM` e simulam o registro de logs e alertas de monitoramento, respectivamente.
+    4.  A classe `GerenciadorVM` (Facade) foi adaptada para atuar como o "Subject" que notifica seus observadores cada vez que uma VM é criada ou seu estado relevante é alterado.
+
+    ```python
+    # Exemplo de uso do Observer na Facade
+    from src.vm_observer import LoggerVMObserver, MonitoramentoVMObserver
+    from src.vm_facade import GerenciadorVM
+
+    gerenciador = GerenciadorVM()
+    logger = LoggerVMObserver()
+    monitor = MonitoramentoVMObserver()
+
+    gerenciador.anexar(logger)
+    gerenciador.anexar(monitor)
+
+    vm_criada = gerenciador.criar_vm_desenvolvimento_linux()
+    # Ao final da criação, o logger e o monitor serão notificados automaticamente.
+    ```
+
+---
+
+### Como Rodar os Testes:
+
+Para rodar os testes unitários e verificar se tudo está funcionando como esperado, navegue até a **pasta raiz do seu projeto** no terminal (por exemplo, `C:\Users\SEU_USUARIO\Documents\Construtor_Máquinas_Virtuais`) e execute o seguinte comando:
+
+```bash
+# Primeiro, navegue até a pasta raiz do seu projeto
+cd C:\Users\SEU_USUARIO\Documents\Construtor_Máquinas_Virtuais
+
+# Em seguida, execute os testes (inclui testes para todos os padrões)
 python -m unittest discover test
